@@ -138,7 +138,7 @@ const Auth = () => {
     }
 
     return (
-        <div className='flex items-center justify-center h-screen bg-gray-50'>
+        <div className='flex items-center justify-center h-screen bg-gray-50 px-4 sm:px-0'>
             <div className='w-full max-w-sm p-6 bg-white border border-gray-200 shadow-xl rounded-lg'>
                 <div className='flex flex-col items-center justify-center'>
                     <img src={assets.logo} alt="Logo" className="w-28 sm:w-32 mb-2" />

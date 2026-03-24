@@ -29,7 +29,7 @@ const BlogList = () => {
 
   return (
     <div>
-      <div className='flex justify-center gap-2.5 sm:gap-8 my-10 relative'>
+      <div className='flex justify-center gap-2.5 sm:gap-8 my-10 relative flex-wrap px-4'>
         {blogCategories.map((item) => (
           <div key={item} className='relative text-sm sm:text-base'>
             <button onClick={() => handleCategoryChange(item)} className={`cursor-pointer text-gray-500 ${menu === item && 'text-white px-4 pt-0.5'}`}>
@@ -41,7 +41,7 @@ const BlogList = () => {
           </div>
         ))}
       </div>
-      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 mb-12 max-w-7xl mx-auto px-20 justify-center'>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8 mb-12 max-w-7xl mx-auto px-4 sm:px-10 md:px-20 justify-center'>
         {filteredBlogs().map((blog) => <BlogCard key={blog._id} blog={blog} />)}
       </div>
 
