@@ -219,3 +219,83 @@ export const verifyEmail = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+// @desc    Send OTP to reset password
+// @route   POST /api/auth/send-reset-otp
+export const sendResetOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.json({ success: false, message: "User not found." });
+    }
+
+    if (user.role === 'admin') {
+      return res.json({ success: false, message: "Forgot password is only available for regular users." });
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    user.verifyOtp = otp;
+    user.verifyOtpExpireAt = Date.now() + 5 * 60 * 1000; // 5 minutes validity
+    await user.save();
+
+    const mailOptions = {
+      from: process.env.SMTP_USER || "noreply@epicbloggy.com",
+      to: email,
+      subject: "EpicBloggy - Password Reset OTP",
+      text: `Your OTP to reset your password is ${otp}. It will expire in 5 minutes.`,
+    };
+
+    try {
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        transporter.sendMail(mailOptions).catch(err => console.error("Error sending email:", err));
+      } else {
+        console.log(`[DEV MODE] Password Reset OTP for ${email} is ${otp}`);
+      }
+    } catch (error) {
+      console.error("Error configuring email:", error);
+    }
+
+    res.json({ success: true, message: "Password reset OTP sent to your email." });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Reset password with OTP
+// @route   POST /api/auth/reset-password
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ success: false, message: "User not found." });
+    }
+
+    if (user.role === 'admin') {
+      return res.json({ success: false, message: "Forgot password is only available for regular users." });
+    }
+
+    if (user.verifyOtp !== otp) {
+      return res.json({ success: false, message: "Invalid OTP." });
+    }
+
+    if (user.verifyOtpExpireAt < Date.now()) {
+      return res.json({ success: false, message: "OTP has expired. Please request a new one." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.verifyOtp = "";
+    user.verifyOtpExpireAt = 0;
+    await user.save();
+
+    res.json({ success: true, message: "Password has been reset successfully." });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
