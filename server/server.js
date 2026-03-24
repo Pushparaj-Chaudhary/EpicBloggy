@@ -11,6 +11,9 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 
 const app = express();
+app.get('/api/health', (req, res) => {
+  res.send('Server is alive');
+});
 
 await connectDB();
 
