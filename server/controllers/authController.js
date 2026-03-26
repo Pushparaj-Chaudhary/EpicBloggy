@@ -80,7 +80,7 @@ export const resendOtp = async (req, res) => {
     await user.save();
 
     const mailOptions = {
-      from: process.env.SMTP_USER || "noreply@epicbloggy.com",
+      from: process.env.SENDER_EMAIL || "noreply@epicbloggy.com",
       to: email,
       subject: "EpicBloggy - Resend OTP",
       text: `Your new OTP is ${otp}. It will expire in 1 minute.`,
