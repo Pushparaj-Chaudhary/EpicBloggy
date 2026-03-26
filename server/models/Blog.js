@@ -5,9 +5,9 @@ const blogSchema = new mongoose.Schema({
     subTitle: {type: String},
     description: {type: String, required: true},
     category: { type: String, required: true },
-  image: { type: String, required: true },
-  imageFileId: { type: String },
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    image: { type: String, required: true },
+    imageFileId: { type: String },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     status: {type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending'},
 }, {timestamps: true});
 

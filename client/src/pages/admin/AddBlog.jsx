@@ -61,7 +61,7 @@ const AddBlog = () => {
         setImage(false);
         setTitle('');
         quillRef.current.root.innerHTML = '';
-        setCategory('Startup');
+        setCategory('All');
       } else {
         toast.error(data.message);
       }
