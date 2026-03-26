@@ -32,7 +32,7 @@ EpicBloggy is a fully-featured, modern blogging platform built with the MERN (Mo
 - Google Gemini API
 - ImageKit API
 - JSONWebToken (JWT) & Bcryptjs
-- Nodemailer
+- Axios
 
 ## 🔧 Prerequisites
 
@@ -58,7 +58,7 @@ Make sure you have the following installed on your machine:
    # JWT Configuration
    JWT_SECRET="your_jwt_secret"
 
-   # SMTP Email Configuration (Nodemailer)
+   # SMTP Email Configuration (Axios)
    SMTP_USER="your_email@gmail.com"
    SMTP_PASS="your_app_password"
 

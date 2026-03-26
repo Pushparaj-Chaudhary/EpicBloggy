@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-import transporter from "../config/nodemailer.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
@@ -22,7 +22,7 @@ export const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpireAt = Date.now() + 1 * 60 * 1000;
+    const otpExpireAt = Date.now() + 5 * 60 * 1000;
 
     const user = await User.create({
       name,
@@ -34,22 +34,15 @@ export const registerUser = async (req, res) => {
     });
 
     if (user) {
-      const mailOptions = {
-        from: process.env.SMTP_USER || "noreply@epicbloggy.com",
-        to: email,
-        subject: "EpicBloggy - Email Verification OTP",
-        text: `Your OTP for email verification is ${otp}. It will expire in 1 minutes.`,
-      };
-
-      try {
-        if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-          transporter.sendMail(mailOptions).catch(err => console.error("Error sending email:", err));
-        } else {
-          console.log(`[DEV MODE] OTP for ${email} is ${otp}`);
-        }
-      } catch (error) {
-        console.error("Error configuring email:", error);
-      }
+      await sendEmail(
+        email,
+        "EpicBloggy - Email Verification OTP",
+        `
+          <h2>Email Verification</h2>
+          <h1>${otp}</h1>
+          <p>This OTP is valid for 5 minutes.</p>
+        `
+      );
 
       res.status(201).json({
         success: true,
@@ -76,25 +69,18 @@ export const resendOtp = async (req, res) => {
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     user.verifyOtp = otp;
-    user.verifyOtpExpireAt = Date.now() + 1 * 60 * 1000; // 1 minute
+    user.verifyOtpExpireAt = Date.now() + 5 * 60 * 1000; // 1 minute
     await user.save();
 
-    const mailOptions = {
-      from: process.env.SENDER_EMAIL || "noreply@epicbloggy.com",
-      to: email,
-      subject: "EpicBloggy - Resend OTP",
-      text: `Your new OTP is ${otp}. It will expire in 1 minute.`,
-    };
-
-    try {
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        transporter.sendMail(mailOptions).catch(err => console.error("Error sending email:", err));
-      } else {
-        console.log(`[DEV MODE] Resent OTP for ${email} is ${otp}`);
-      }
-    } catch (error) {
-      console.error("Error configuring email:", error);
-    }
+    await sendEmail(
+      email,
+      "EpicBloggy - Resend OTP",
+      `
+        <h2>Resend OTP</h2>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `
+    );
 
     res.json({ success: true, message: "A new OTP has been sent." });
   } catch (error) {
@@ -122,25 +108,18 @@ export const loginUser = async (req, res) => {
       if (user.role === 'admin') {
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         user.verifyOtp = otp;
-        user.verifyOtpExpireAt = Date.now() + 1 * 60 * 1000;
+        user.verifyOtpExpireAt = Date.now() + 5 * 60 * 1000;
         await user.save();
 
-        const mailOptions = {
-          from: process.env.SMTP_USER || "noreply@epicbloggy.com",
-          to: email,
-          subject: "EpicBloggy - Admin Login OTP",
-          text: `Your OTP for admin login is ${otp}. It will expire in 1 minutes.`,
-        };
-
-        try {
-          if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-            transporter.sendMail(mailOptions).catch(err => console.error("Error sending email:", err));
-          } else {
-            console.log(`[DEV MODE] Admin Login OTP for ${email} is ${otp}`);
-          }
-        } catch (error) {
-          console.error("Error configuring email:", error);
-        }
+        await sendEmail(
+          email,
+          "EpicBloggy - Admin Login OTP",
+           `
+            <h2>Admin Login OTP</h2>
+            <h1>${otp}</h1>
+            <p>This OTP is valid for 5 minutes.</p>
+          `
+        );
 
         return res.json({
           success: true,
@@ -240,22 +219,15 @@ export const sendResetOtp = async (req, res) => {
     user.verifyOtpExpireAt = Date.now() + 5 * 60 * 1000; // 5 minutes validity
     await user.save();
 
-    const mailOptions = {
-      from: process.env.SMTP_USER || "noreply@epicbloggy.com",
-      to: email,
-      subject: "EpicBloggy - Password Reset OTP",
-      text: `Your OTP to reset your password is ${otp}. It will expire in 5 minutes.`,
-    };
-
-    try {
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        transporter.sendMail(mailOptions).catch(err => console.error("Error sending email:", err));
-      } else {
-        console.log(`[DEV MODE] Password Reset OTP for ${email} is ${otp}`);
-      }
-    } catch (error) {
-      console.error("Error configuring email:", error);
-    }
+    await sendEmail(
+      email,
+      "EpicBloggy - Password Reset OTP",
+      `
+        <h2>Password Reset OTP</h2>
+        <h1>${otp}</h1>
+        <p>This OTP is valid for 5 minutes.</p>
+      `
+    );
 
     res.json({ success: true, message: "Password reset OTP sent to your email." });
   } catch (error) {
